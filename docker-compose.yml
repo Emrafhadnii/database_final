@@ -1,0 +1,90 @@
+networks:
+    app-network:
+      driver: bridge
+services:
+
+  # app:
+  #   build: 
+  #     dockerfile: Dockerfile
+  #
+  #   restart: on-failure
+  #
+  #   container_name: snapp 
+  #   depends_on:
+  #     - mongodb
+  #     - rabbitmq
+  #     - redis
+  #     - postgres
+  #     
+  #   ports:
+  #     - "8000:8000"
+  #   command: >
+  #     bash -c "alembic upgrade head &&
+  #             uvicorn src.main:app --host 0.0.0.0 --reload"
+  #   networks:
+  #     - app-network
+
+
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: postgres
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: always
+
+  rabbitmq:
+    image: "rabbitmq:management"
+    container_name: rabbitmq
+    env_file: .env
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    ports:
+      - "15673:15672"
+      - "5673:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+    restart: always
+  redis:
+    image: redis:latest
+    container_name: redis
+    env_file: .env
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    restart: always
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    env_file: .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+    restart: always
+ 
+volumes:
+  postgres_data:
+  redis_data:
+  mongodb_data:
+  rabbitmq_data:    
+
