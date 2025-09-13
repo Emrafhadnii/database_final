@@ -24,6 +24,11 @@ class DeleteDriver:
     id: int
 
 
+@dataclass
+class ToggleDriverStatus:
+    id: int
+
+
 async def handle_create_driver(command: CreateDriver, uow: UnitOfWork):
     async with uow:
         driver = Driver(
@@ -53,3 +58,12 @@ async def handle_delete_driver(command: DeleteDriver, uow: UnitOfWork):
         if not driver:
             raise HTTPException(404, "entity not found")
         await uow.driver.delete(driver)
+
+
+async def handle_toggle_driver_status(command: ToggleDriverStatus, uow: UnitOfWork):
+    async with uow:
+        driver = await uow.driver.select_by_id(Driver, command.id)
+        if not driver:
+            raise HTTPException(404, "entity not found")
+        driver.toggle_on()
+        await uow.driver.update(driver)

@@ -10,6 +10,8 @@ from src.command_handlers.rides_handlers import (
     AcceptRide,
     CompleteRide,
     DeleteRide,
+    StartRide,
+    UseDiscount,
     handle_create_ride,
     handle_update_ride_fare,
     handle_update_ride_end_address,
@@ -20,11 +22,24 @@ from src.command_handlers.rides_handlers import (
     handle_accept_ride,
     handle_complete_ride,
     handle_delete_ride,
+    handle_start_ride,
+    handle_use_discount,
 )
 from src.endpoints.views.rides_view import get_all_rides, get_ride_by_id, get_nearby_rides_view
 from src.service_layer.unit_of_work import UnitOfWork
 from src.endpoints.dependencies.uow_dependency import get_uow
-from src.endpoints.request_models import RideCreate, RideAccept, RideCancel, RideStatus, RideUpdateAlternativeEndAddress, RideUpdateEndAddress, RideUpdateFare, RideUpdateStartAddress, RideUpdateStopTime
+from src.endpoints.request_models import (
+    RideCreate,
+    RideAccept,
+    RideCancel,
+    RideStatus,
+    RideUpdateAlternativeEndAddress,
+    RideUpdateEndAddress,
+    RideUpdateFare,
+    RideUpdateStartAddress,
+    RideUpdateStopTime,
+    RideUseDiscount,
+)
 
 router = APIRouter()
 
@@ -108,6 +123,22 @@ async def complete_ride(ride_id: int, uow: UnitOfWork = Depends(get_uow)):
     cmd = CompleteRide(id=ride_id)
     await handle_complete_ride(cmd, uow)
     return {"message": "Ride completed successfully"}
+
+
+@router.put("/rides/{ride_id}/start", status_code=200)
+async def start_ride(ride_id: int, uow: UnitOfWork = Depends(get_uow)):
+    cmd = StartRide(id=ride_id)
+    await handle_start_ride(cmd, uow)
+    return {"message": "Ride started successfully"}
+
+
+@router.put("/rides/{ride_id}/use-discount", status_code=200)
+async def use_discount(
+    ride_id: int, ride: RideUseDiscount, uow: UnitOfWork = Depends(get_uow)
+):
+    cmd = UseDiscount(id=ride_id, discount_id=ride.discount_id)
+    await handle_use_discount(cmd, uow)
+    return {"message": "Discount used successfully"}
 
 
 @router.delete("/rides/{ride_id}", status_code=200)

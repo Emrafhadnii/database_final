@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     RABBITMQ_USER: str
     RABBITMQ_PASSWORD: str
     RABBIT_URL: str
-
+    GEMINI_API_KEY: str
+    GOOGLE_CLOUD_PROJECT: str
     class Config:
         env_file = ".env"
 

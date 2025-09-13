@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from src.command_handlers.complaints_handlers import (
     CreateComplaint,
     UpdateComplaint,
@@ -10,6 +10,7 @@ from src.command_handlers.complaints_handlers import (
 from src.endpoints.views.complaints_view import (
     get_all_complaints,
     get_complaint_by_id,
+    search_complaints_by_reason,
 )
 from src.service_layer.unit_of_work import UnitOfWork
 from src.endpoints.dependencies.uow_dependency import get_uow
@@ -55,3 +56,8 @@ async def get_complaint(complaint_id: int, uow: UnitOfWork = Depends(get_uow)):
     if not complaint:
         raise HTTPException(status_code=404, detail="Complaint not found")
     return complaint
+
+@router.get("/complaints/search/", status_code=200)
+async def search_complaints(reason: str = Query(..., min_length=3, max_length=50)):
+    complaints = await search_complaints_by_reason(reason)
+    return complaints

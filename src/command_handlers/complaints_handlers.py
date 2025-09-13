@@ -22,6 +22,10 @@ class DeleteComplaint:
     id: int
 
 
+from src.endpoints.dependencies.bus_dependency import messagebus
+from src.events import ComplaintCreated
+
+
 async def handle_create_complaint(command: CreateComplaint, uow: UnitOfWork):
     async with uow:
         complaint = Complaint(
@@ -30,6 +34,18 @@ async def handle_create_complaint(command: CreateComplaint, uow: UnitOfWork):
             reasons=command.reasons,
         )
         await uow.complaint.insert(complaint)
+
+        event = ComplaintCreated(
+            id=complaint.id,
+            user_id=complaint.user_id,
+            driver_id=complaint.driver_id,
+            reasons=complaint.reasons,
+        )
+
+        await messagebus.publish(
+            "complaint_created",
+            event.dict()
+        )
 
 
 async def handle_update_complaint(command: UpdateComplaint, uow: UnitOfWork):

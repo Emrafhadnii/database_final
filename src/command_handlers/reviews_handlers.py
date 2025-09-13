@@ -25,6 +25,10 @@ class DeleteReview:
     id: int
 
 
+from src.endpoints.dependencies.bus_dependency import messagebus
+from src.events import ReviewCreated
+
+
 async def handle_create_review(command: CreateReview, uow: UnitOfWork):
     async with uow:
         review = Review(
@@ -34,7 +38,21 @@ async def handle_create_review(command: CreateReview, uow: UnitOfWork):
             rating=command.rating,
             comment=command.comment,
         )
+
         await uow.review.insert(review)
+
+        event = ReviewCreated(
+            id=review.id,
+            ride_id=review.ride_id,
+            user_id=review.user_id,
+            driver_id=review.driver_id,
+            rating=review.rating,
+            comment=review.comment,
+        )
+        await messagebus.publish(
+            "review_created",
+            event.dict()
+        )
 
 
 async def handle_update_review(command: UpdateReview, uow: UnitOfWork):

@@ -14,3 +14,8 @@ async def get_driver_by_id(driver_id: int, uow: UnitOfWork):
         if driver:
             return driver.to_dict()
         return None
+
+async def get_online_drivers(uow: UnitOfWork):
+    async with uow:
+        drivers = await uow.driver.select_online_drivers()
+        return [driver.to_dict() for driver in drivers]

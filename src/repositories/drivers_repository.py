@@ -33,3 +33,10 @@ class DriverSqlalchemyRepository(AbstractSqlalchemyRepository):
         rows = result.fetchall()  
         return [Driver.factory(**r._mapping) for r in rows]
 
+    async def select_online_drivers(self) -> list[Driver]:
+        table = Driver.entity_type().value
+        query = text(f"SELECT * FROM {table} WHERE is_on = true")
+        result = await self._session.execute(query)
+        rows = result.fetchall()
+        return [Driver.factory(**r._mapping) for r in rows]
+

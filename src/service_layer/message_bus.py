@@ -22,7 +22,8 @@ class MessageBus:
                 body=json.dumps(message).encode(),
                 priority=priority,
                 delivery_mode=2
-            )
+            ),
+            routing_key=topic
         )
 
     async def subscribe(self, topic: str, callback: Callable[[Dict[str, Any]], Any]):

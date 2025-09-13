@@ -67,9 +67,19 @@ class CompleteRide:
 
 
 @dataclass
-class DeleteRide:
+class StartRide:
     id: int
 
+
+@dataclass
+class UseDiscount:
+    id: int
+    discount_id: int
+
+
+@dataclass
+class DeleteRide:
+    id: int
 
 async def handle_create_ride(command: CreateRide, uow: UnitOfWork):
     async with uow:
@@ -164,6 +174,24 @@ async def handle_complete_ride(command: CompleteRide, uow: UnitOfWork):
         if not ride:
             raise HTTPException(404, "entity not found")
         ride.ride_completed()
+        await uow.ride.update(ride)
+
+
+async def handle_start_ride(command: StartRide, uow: UnitOfWork):
+    async with uow:
+        ride = await uow.ride.select_by_id(Ride, command.id)
+        if not ride:
+            raise HTTPException(404, "entity not found")
+        ride.start_ride()
+        await uow.ride.update(ride)
+
+
+async def handle_use_discount(command: UseDiscount, uow: UnitOfWork):
+    async with uow:
+        ride = await uow.ride.select_by_id(Ride, command.id)
+        if not ride:
+            raise HTTPException(404, "entity not found")
+        ride.use_discount(discount_id=command.discount_id)
         await uow.ride.update(ride)
 
 

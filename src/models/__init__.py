@@ -1,4 +1,4 @@
-from .complaints import Complaint
+from .users import User
 from .vehicles import Vehicle
 from .discounts import Discount
 from .drivers import Driver
@@ -6,11 +6,12 @@ from .dwallet import DWallet
 from .payments import Payment
 from .reviews import Review
 from .rides import Ride
-from .users import User
+from .complaints import Complaint
+from .user_discounts import UserDiscount
 
 
 __all__ = [
-    "Complaint",
+    "User",
     "Vehicle",
     "Discount",
     "Driver",
@@ -18,5 +19,6 @@ __all__ = [
     "Payment",
     "Review",
     "Ride",
-    "User"
+    "Complaint",
+    "UserDiscount",
 ]

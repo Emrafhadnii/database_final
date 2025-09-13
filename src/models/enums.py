@@ -40,3 +40,4 @@ class EntityType(BaseEnum):
     RIDE = "rides"
     USER = "users"
     VEHICLE = "vehicles"
+    USER_DISCOUNT = "user_discounts"

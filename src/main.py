@@ -14,6 +14,12 @@ from .endpoints import (
     payments,
     reviews,
     complaints,
+    user_discounts,
+)
+
+from src.event_handlers.mongo_sync_handlers import (
+    handle_complaint_created,
+    handle_review_created,
 )
 
 mappers()
@@ -27,6 +33,8 @@ async def lifespan(app: FastAPI):
         [("reasons", "text")], default_language="english"
     )
     await db["review"].create_index([("comment", "text")], default_language="english")
+    await messagebus.subscribe("complaint_created", handle_complaint_created)
+    await messagebus.subscribe("review_created", handle_review_created)
 
     yield
 
@@ -46,3 +54,4 @@ app.include_router(dwallet.router, prefix="/api", tags=["dwallet"])
 app.include_router(payments.router, prefix="/api", tags=["payments"])
 app.include_router(reviews.router, prefix="/api", tags=["reviews"])
 app.include_router(complaints.router, prefix="/api", tags=["complaints"])
+app.include_router(user_discounts.router, prefix="/api", tags=["user_discounts"])

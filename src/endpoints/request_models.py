@@ -60,6 +60,10 @@ class RideCancel(BaseModel):
     canceller_id: int
 
 
+class RideUseDiscount(BaseModel):
+    discount_id: int
+
+
 class RideAccept(BaseModel):
     driver_id: int
 
@@ -136,4 +140,13 @@ class ComplaintCreate(BaseModel):
 
 class ComplaintUpdate(BaseModel):
     reasons: str
+
+
+class UserDiscountCreate(BaseModel):
+    user_id: int
+    discount_id: int
+
+
+class UserDiscountUpdate(BaseModel):
+    used: bool
 

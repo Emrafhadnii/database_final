@@ -22,6 +22,7 @@ rides_data_model = Table(
     Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
     Column("driver_id", Integer, ForeignKey("drivers.id")),
     Column("canceller_id", Integer),
+    Column("discount_id", Integer, ForeignKey("discounts.id")),
     Column("start_address", Geometry(geometry_type='POINT', srid=4326), nullable=False),
     Column("end_address", Geometry(geometry_type='POINT', srid=4326), nullable=False),
     Column("alternative_end_address", Geometry(geometry_type='POINT', srid=4326)),
@@ -52,6 +53,7 @@ class Ride(AbstractEntity):
     user_id: int
     driver_id: int | None
     canceller_id: int | None
+    discount_id: int | None
     start_address: str
     end_address: str
     alternative_end_address: str | None
@@ -77,6 +79,7 @@ class Ride(AbstractEntity):
         canceller_id: int | None = None,
         alternative_end_address: str | None = None,
         stop_time: str | None = None,
+        discount_id: int | None = None,
     ):
         self.user_id = user_id
         self.driver_id = driver_id
@@ -89,6 +92,7 @@ class Ride(AbstractEntity):
         self.fare = fare
         self.status = RideStatus.REQUESTED
         self.requested_at = datetime.now(UTC)
+        self.discount_id = discount_id
         # self.created_at = datetime.now(UTC)
 
     def update_fare(
@@ -160,7 +164,17 @@ class Ride(AbstractEntity):
 
     def ride_completed(self):
         self.status = RideStatus.COMPLETED
-        self.completed_at = datetime.now(UTC) 
+        self.completed_at = datetime.now(UTC)
+
+    def start_ride(self):
+        self.status = RideStatus.IN_PROGRESS
+        self.started_at = datetime.now(UTC)
+
+    def use_discount(self, discount_id: int):
+        if discount_id is None:
+            raise ValueError("Discount ID cannot be empty")
+        self.discount_id = discount_id
+        self.updated_at = datetime.now(UTC)
 
     def to_dict(self, **kwargs) -> dict:
         return {
@@ -168,6 +182,7 @@ class Ride(AbstractEntity):
             "user_id": self.user_id,
             "driver_id": self.driver_id,
             "canceller_id": self.canceller_id,
+            "discount_id": self.discount_id,
             "start_address": self.start_address,
             "end_address": self.end_address,
             "alternative_end_address": self.alternative_end_address,
@@ -200,6 +215,7 @@ class Ride(AbstractEntity):
             canceller_id=kwargs.get("canceller_id"),
             alternative_end_address=kwargs.get("alternative_end_address"),
             stop_time=kwargs.get("stop_time"),
+            discount_id=kwargs.get("discount_id"),
         )
         ride.id = kwargs["id"]
         ride.requested_at = kwargs["requested_at"]

@@ -5,7 +5,8 @@ from sqlalchemy import (
     Table,
     func,
     UniqueConstraint,
-    String
+    String,
+    Boolean
 )
 
 from config.postgres import mapper_registry
@@ -22,6 +23,7 @@ drivers_data_model = Table(
     Column("first_name", String(50), nullable=False),
     Column("last_name", String(50), nullable=False),
     Column("ce_code", Integer, unique=True, nullable=False),
+    Column("is_on", Boolean, default=False, nullable=False),
     Column(
         "created_at",
         DateTime(timezone=True),
@@ -42,6 +44,7 @@ class Driver(AbstractEntity):
     first_name: str
     last_name: str
     ce_code: int
+    is_on: bool
     created_at: datetime
     updated_at: datetime | None
 
@@ -56,6 +59,7 @@ class Driver(AbstractEntity):
         self.first_name = first_name
         self.last_name = last_name
         self.ce_code = ce_code
+        self.is_on = False
         self.created_at = datetime.now(UTC)
     
     def update(
@@ -67,6 +71,9 @@ class Driver(AbstractEntity):
         self.last_name = self.last_name if last_name is None else last_name
         self.updated_at = datetime.now(UTC)
 
+    def toggle_on(self):
+        self.is_on = not self.is_on
+
     def to_dict(self, **kwargs) -> dict:
         return {
             "id": self.id,
@@ -74,6 +81,7 @@ class Driver(AbstractEntity):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "ce_code": self.ce_code,
+            "is_on": self.is_on,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             **kwargs
@@ -92,6 +100,7 @@ class Driver(AbstractEntity):
             ce_code=kwargs["ce_code"]
         )
         driver.id = kwargs["id"]
+        driver.is_on = kwargs["is_on"]
         driver.created_at = kwargs["created_at"]
         driver.updated_at = kwargs.get("updated_at")
         return driver
