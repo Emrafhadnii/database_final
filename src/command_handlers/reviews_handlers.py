@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from src.service_layer.unit_of_work import UnitOfWork
 from src.models.reviews import Review
 from fastapi import HTTPException
+from src.endpoints.dependencies.redis_dependency import redis_dependency
+import json
 
 
 @dataclass
@@ -65,6 +67,7 @@ async def handle_update_review(command: UpdateReview, uow: UnitOfWork):
             comment=command.comment,
         )
         await uow.review.update(review)
+        await redis_dependency.set(f"{Review.entity_type()}:{command.id}", json.dumps(review.to_dict()), ex=3600)
 
 
 async def handle_delete_review(command: DeleteReview, uow: UnitOfWork):
@@ -73,3 +76,4 @@ async def handle_delete_review(command: DeleteReview, uow: UnitOfWork):
         if not review:
             raise HTTPException(404, "entity not found")
         await uow.review.delete(review)
+        await redis_dependency.delete(f"{Review.entity_type()}:{command.id}")

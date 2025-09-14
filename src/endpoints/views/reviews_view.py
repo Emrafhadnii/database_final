@@ -2,6 +2,9 @@ from src.service_layer.unit_of_work import UnitOfWork
 from src.models.reviews import Review
 from typing import List
 from config.mongo_db import db
+from src.endpoints.dependencies.redis_dependency import redis_dependency
+from fastapi import HTTPException
+import json
 
 
 async def get_all_reviews(uow: UnitOfWork):
@@ -11,11 +14,18 @@ async def get_all_reviews(uow: UnitOfWork):
 
 
 async def get_review_by_id(review_id: int, uow: UnitOfWork):
+    key = f"{Review.entity_type()}:{review_id}"
+    cached_review = await redis_dependency.get(key)
+    if cached_review:
+        return json.loads(cached_review)
+
     async with uow:
         review = await uow.review.select_by_id(Review, review_id)
         if review:
-            return review.to_dict()
-        return None
+            review_dict = review.to_dict()
+            await redis_dependency.set(key, json.dumps(review_dict), ex=3600)
+            return review_dict
+        raise HTTPException(404, "there is not any review with given id")
 
 
 async def get_reviews_by_ids(

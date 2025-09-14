@@ -12,3 +12,12 @@ class RedisClient:
         
     async def disconnect(self):
         await self.redis.close()
+
+    async def set(self, key: str, value: str, ex: int):
+        await self.redis.set(key, value, ex)
+
+    async def get(self, key: str):
+        return await self.redis.get(key)
+
+    async def delete(self, key: str):
+        await self.redis.delete(key)

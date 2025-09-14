@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 from src.command_handlers.rides_handlers import (
-    CreateRide,
     UpdateRideFare,
     UpdateRideEndAddress,
     UpdateRideStartAddress,
@@ -12,7 +11,9 @@ from src.command_handlers.rides_handlers import (
     DeleteRide,
     StartRide,
     UseDiscount,
-    handle_create_ride,
+    handle_create_taxi_ride,
+    handle_create_box_ride,
+    handle_create_truck_ride,
     handle_update_ride_fare,
     handle_update_ride_end_address,
     handle_update_ride_start_address,
@@ -24,12 +25,17 @@ from src.command_handlers.rides_handlers import (
     handle_delete_ride,
     handle_start_ride,
     handle_use_discount,
+    CreateTaxiRide,
+    CreateBoxRide,
+    CreateTruckRide,
 )
 from src.endpoints.views.rides_view import get_all_rides, get_ride_by_id, get_nearby_rides_view
 from src.service_layer.unit_of_work import UnitOfWork
 from src.endpoints.dependencies.uow_dependency import get_uow
 from src.endpoints.request_models import (
-    RideCreate,
+    TaxiRideCreate,
+    BoxRideCreate,
+    TruckRideCreate,
     RideAccept,
     RideCancel,
     RideStatus,
@@ -44,11 +50,25 @@ from src.endpoints.request_models import (
 router = APIRouter()
 
 
-@router.post("/rides/", status_code=201)
-async def create_ride(ride: RideCreate, uow: UnitOfWork = Depends(get_uow)):
-    cmd = CreateRide(**ride.dict())
-    await handle_create_ride(cmd, uow)
-    return {"message": "Ride created successfully"}
+@router.post("/rides/taxi", status_code=201)
+async def create_taxi_ride(ride: TaxiRideCreate, uow: UnitOfWork = Depends(get_uow)):
+    cmd = CreateTaxiRide(**ride.dict())
+    await handle_create_taxi_ride(cmd, uow)
+    return {"message": "Taxi ride created successfully"}
+
+
+@router.post("/rides/box", status_code=201)
+async def create_box_ride(ride: BoxRideCreate, uow: UnitOfWork = Depends(get_uow)):
+    cmd = CreateBoxRide(**ride.dict())
+    await handle_create_box_ride(cmd, uow)
+    return {"message": "Box ride created successfully"}
+
+
+@router.post("/rides/truck", status_code=201)
+async def create_truck_ride(ride: TruckRideCreate, uow: UnitOfWork = Depends(get_uow)):
+    cmd = CreateTruckRide(**ride.dict())
+    await handle_create_truck_ride(cmd, uow)
+    return {"message": "Truck ride created successfully"}
 
 
 @router.put("/rides/{ride_id}/fare", status_code=200)

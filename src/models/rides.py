@@ -25,8 +25,6 @@ rides_data_model = Table(
     Column("discount_id", Integer, ForeignKey("discounts.id")),
     Column("start_address", Geometry(geometry_type='POINT', srid=4326), nullable=False),
     Column("end_address", Geometry(geometry_type='POINT', srid=4326), nullable=False),
-    Column("alternative_end_address", Geometry(geometry_type='POINT', srid=4326)),
-    Column("stop_time", Time(timezone=False)),
     Column("ride_type", Enum(RideType), nullable=False),
     Column("status", Enum(RideStatus), default=RideStatus.REQUESTED, nullable=False),
     Column("requested_at", DateTime(timezone=True), default=func.now(), nullable=False),
@@ -56,8 +54,6 @@ class Ride(AbstractEntity):
     discount_id: int | None
     start_address: str
     end_address: str
-    alternative_end_address: str | None
-    stop_time: time | None
     ride_type: RideType
     status: RideStatus
     requested_at: datetime
@@ -77,8 +73,6 @@ class Ride(AbstractEntity):
         fare: int,
         driver_id: int | None = None,
         canceller_id: int | None = None,
-        alternative_end_address: str | None = None,
-        stop_time: str | None = None,
         discount_id: int | None = None,
     ):
         self.user_id = user_id
@@ -86,8 +80,6 @@ class Ride(AbstractEntity):
         self.canceller_id = canceller_id
         self.start_address = start_address
         self.end_address = end_address
-        self.alternative_end_address = alternative_end_address
-        self.stop_time = stop_time
         self.ride_type = ride_type
         self.fare = fare
         self.status = RideStatus.REQUESTED
@@ -121,24 +113,6 @@ class Ride(AbstractEntity):
         if start_address is None:
             raise ValueError("Start address cannot be empty")
         self.start_address = start_address
-        self.updated_at = datetime.now(UTC)
-
-    def update_alternative_end_address(
-        self,
-        alternative_end_address: str
-    ):
-        if alternative_end_address is None:
-            raise ValueError("Alternative end address cannot be empty")
-        self.alternative_end_address = alternative_end_address
-        self.updated_at = datetime.now(UTC)
-
-    def update_stop_time(
-        self,
-        stop_time: time
-    ):
-        if stop_time is None:
-            raise ValueError("Stop time cannot be empty")
-        self.stop_time = stop_time
         self.updated_at = datetime.now(UTC)
 
     def cancel_ride(
@@ -185,8 +159,6 @@ class Ride(AbstractEntity):
             "discount_id": self.discount_id,
             "start_address": self.start_address,
             "end_address": self.end_address,
-            "alternative_end_address": self.alternative_end_address,
-            "stop_time": self.stop_time,
             "ride_type": self.ride_type.value,
             "status": self.status.value,
             "requested_at": self.requested_at,
@@ -213,8 +185,6 @@ class Ride(AbstractEntity):
             fare=kwargs["fare"],
             driver_id=kwargs.get("driver_id"),
             canceller_id=kwargs.get("canceller_id"),
-            alternative_end_address=kwargs.get("alternative_end_address"),
-            stop_time=kwargs.get("stop_time"),
             discount_id=kwargs.get("discount_id"),
         )
         ride.id = kwargs["id"]

@@ -4,6 +4,8 @@ from src.models.discounts import Discount
 from src.models.enums import DiscountType
 from datetime import datetime
 from fastapi import HTTPException
+from src.endpoints.dependencies.redis_dependency import redis_dependency
+import json
 
 
 @dataclass
@@ -53,6 +55,7 @@ async def handle_update_discount(command: UpdateDiscount, uow: UnitOfWork):
             ride_type=command.ride_type,
         )
         await uow.discount.update(discount)
+        await redis_dependency.set(f"{Discount.entity_type()}:{command.id}", json.dumps(discount.to_dict()), ex=3600)
 
 
 async def handle_delete_discount(command: DeleteDiscount, uow: UnitOfWork):
@@ -61,3 +64,4 @@ async def handle_delete_discount(command: DeleteDiscount, uow: UnitOfWork):
         if not discount:
             raise HTTPException(404, "entity not found")
         await uow.discount.delete(discount)
+        await redis_dependency.delete(f"{Discount.entity_type()}:{command.id}")

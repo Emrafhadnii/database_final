@@ -28,12 +28,33 @@ class RideCreate(BaseModel):
     user_id: int
     start_address: str
     end_address: str
-    ride_type: RideType
-    fare: int
-    driver_id: int | None = None
-    canceller_id: int | None = None
+    discount_id: int | None = None
+
+
+class TaxiRideCreate(RideCreate):
+    ride_type: RideType = RideType.TAXI
     alternative_end_address: str | None = None
     stop_time: time | None = None
+
+
+class BoxRideCreate(RideCreate):
+    ride_type: RideType = RideType.BOX
+    sender_name: str
+    sender_phone: str
+    recipient_name: str
+    recipient_phone: str
+    max_insurance: str
+    consignment_type: str
+
+
+class TruckRideCreate(RideCreate):
+    ride_type: RideType = RideType.TRUCK
+    sender_name: str
+    sender_phone: str
+    recipient_name: str
+    recipient_phone: str
+    max_insurance: str
+    has_worker: bool
 
 
 class RideUpdateFare(BaseModel):

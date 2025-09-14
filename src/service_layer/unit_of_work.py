@@ -9,6 +9,9 @@ from src.repositories.rides_repository import RideSqlalchemyRepository
 from src.repositories.users_repository import UserSqlalchemyRepository
 from src.repositories.vehicles_repository import VehicleSqlalchemyRepository
 from src.repositories.user_discounts_repository import UserDiscountSqlalchemyRepository
+from src.repositories.box_rides_repository import BoxRideSqlalchemyRepository
+from src.repositories.truck_rides_repository import TruckRideSqlalchemyRepository
+from src.repositories.taxi_rides_repository import TaxiRideSqlalchemyRepository
 
 
 class UnitOfWork:
@@ -24,6 +27,9 @@ class UnitOfWork:
         self.user = UserSqlalchemyRepository(self.session)
         self.vehicle = VehicleSqlalchemyRepository(self.session)
         self.user_discount = UserDiscountSqlalchemyRepository(self.session)
+        self.box_ride = BoxRideSqlalchemyRepository(self.session)
+        self.truck_ride = TruckRideSqlalchemyRepository(self.session)
+        self.taxi_ride = TaxiRideSqlalchemyRepository(self.session)
     
     async def commit(self):
         await self.session.commit()

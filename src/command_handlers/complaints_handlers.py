@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from src.service_layer.unit_of_work import UnitOfWork
 from src.models.complaints import Complaint
 from fastapi import HTTPException
+from src.endpoints.dependencies.redis_dependency import redis_dependency
+import json
 
 
 @dataclass
@@ -57,6 +59,7 @@ async def handle_update_complaint(command: UpdateComplaint, uow: UnitOfWork):
             reasons=command.reasons,
         )
         await uow.complaint.update(complaint)
+        await redis_dependency.set(f"{Complaint.entity_type()}:{command.id}", json.dumps(complaint.to_dict()), ex=3600)
 
 
 async def handle_delete_complaint(command: DeleteComplaint, uow: UnitOfWork):
@@ -65,3 +68,4 @@ async def handle_delete_complaint(command: DeleteComplaint, uow: UnitOfWork):
         if not complaint:
             raise HTTPException(404, "entity not found")
         await uow.complaint.delete(complaint)
+        await redis_dependency.delete(f"{Complaint.entity_type()}:{command.id}")

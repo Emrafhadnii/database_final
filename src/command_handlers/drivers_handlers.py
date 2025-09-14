@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from src.service_layer.unit_of_work import UnitOfWork
 from src.models.drivers import Driver
 from fastapi import HTTPException
+from src.endpoints.dependencies.redis_dependency import redis_dependency
+import json
 
 
 @dataclass
@@ -50,6 +52,7 @@ async def handle_update_driver(command: UpdateDriver, uow: UnitOfWork):
             last_name=command.last_name,
         )
         await uow.driver.update(driver)
+        await redis_dependency.set(f"{Driver.entity_type()}:{command.id}", json.dumps(driver.to_dict()), ex=3600)
 
 
 async def handle_delete_driver(command: DeleteDriver, uow: UnitOfWork):
@@ -58,6 +61,7 @@ async def handle_delete_driver(command: DeleteDriver, uow: UnitOfWork):
         if not driver:
             raise HTTPException(404, "entity not found")
         await uow.driver.delete(driver)
+        await redis_dependency.delete(f"{Driver.entity_type()}:{command.id}")
 
 
 async def handle_toggle_driver_status(command: ToggleDriverStatus, uow: UnitOfWork):
@@ -67,3 +71,4 @@ async def handle_toggle_driver_status(command: ToggleDriverStatus, uow: UnitOfWo
             raise HTTPException(404, "entity not found")
         driver.toggle_on()
         await uow.driver.update(driver)
+        await redis_dependency.delete(f"{Driver.entity_type()}:{command.id}")

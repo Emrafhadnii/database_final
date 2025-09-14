@@ -3,6 +3,8 @@ from src.service_layer.unit_of_work import UnitOfWork
 from src.models.vehicles import Vehicle
 from src.models.enums import VehicleType
 from fastapi import HTTPException
+from src.endpoints.dependencies.redis_dependency import redis_dependency
+import json
 
 
 @dataclass
@@ -46,6 +48,7 @@ async def handle_update_vehicle(command: UpdateVehicle, uow: UnitOfWork):
             owner_id=command.owner_id,
         )
         await uow.vehicle.update(vehicle)
+        await redis_dependency.set(f"{Vehicle.entity_type()}:{command.id}", json.dumps(vehicle.to_dict()), ex=3600)
 
 
 async def handle_delete_vehicle(command: DeleteVehicle, uow: UnitOfWork):
@@ -54,3 +57,4 @@ async def handle_delete_vehicle(command: DeleteVehicle, uow: UnitOfWork):
         if not vehicle:
             raise HTTPException(404, "entity not found")
         await uow.vehicle.delete(vehicle)
+        await redis_dependency.delete(f"{Vehicle.entity_type()}:{command.id}")

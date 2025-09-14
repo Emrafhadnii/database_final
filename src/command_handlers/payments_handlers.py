@@ -3,6 +3,8 @@ from src.service_layer.unit_of_work import UnitOfWork
 from src.models.payments import Payment
 from src.models.enums import PaymentMethod
 from fastapi import HTTPException
+from src.endpoints.dependencies.redis_dependency import redis_dependency
+import json
 
 
 @dataclass
@@ -48,6 +50,7 @@ async def handle_update_payment(command: UpdatePayment, uow: UnitOfWork):
             payment_method=command.payment_method,
         )
         await uow.payment.update(payment)
+        await redis_dependency.set(f"{Payment.entity_type()}:{command.id}", json.dumps(payment.to_dict()), ex=3600)
 
 
 async def handle_delete_payment(command: DeletePayment, uow: UnitOfWork):
@@ -56,3 +59,4 @@ async def handle_delete_payment(command: DeletePayment, uow: UnitOfWork):
         if not payment:
             raise HTTPException(404, "entity not found")
         await uow.payment.delete(payment)
+        await redis_dependency.delete(f"{Payment.entity_type()}:{command.id}")

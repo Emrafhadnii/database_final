@@ -41,3 +41,31 @@ class EntityType(BaseEnum):
     USER = "users"
     VEHICLE = "vehicles"
     USER_DISCOUNT = "user_discounts"
+    BOX_RIDE = "box_rides"
+    TRUCK_RIDE = "truck_rides"
+    TAXI_RIDE = "taxi_rides"
+
+
+class BoxInsurance(BaseEnum):
+    FIVE_MIL = "FIVE_MIL"
+    TEN_MIL = "TEN_MIL"
+    FIFTEEN_MIL = "FIFTEEN_MIL"
+    THIRTY_MIL = "THIRTY_MIL"
+
+
+class TruckInsurance(BaseEnum):
+    FIVE_MIL = "FIVE_MIL"
+    TEN_MIL = "TEN_MIL"
+    FIFTEEN_MIL = "FIFTEEN_MIL"
+    THIRTY_MIL = "THIRTY_MIL"
+    FIFTY_MIL = "FIFTY_MIL"
+    HUNDRED_MIL = "HUNDRED_MIL"
+
+
+class ConsignmentType(BaseEnum):
+    FOOD = "FOOD"
+    CLOTHES = "CLOTHES"
+    ELECTRICAL = "ELECTRICAL"
+    COSMETICS = "COSMETICS"
+    LETTER = "LETTER"
+    OTHERS = "OTHERS"
